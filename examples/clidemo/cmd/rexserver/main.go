@@ -8,6 +8,7 @@ import (
 
 	"github.com/bmatsuo/rex/examples/demo/rexdemo"
 	"github.com/bmatsuo/rex/room"
+	"github.com/bmatsuo/rex/room/roomdisco"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 		Bus:  room.NewBus(background, demo),
 		Addr: room.BestAddr(),
 	}
-	if config.Addr != "" {
+	if config.Addr == "" {
 		log.Printf("[WARN] Unable to locate a good address for binding")
 	}
 	server, err := StartServer(config)
@@ -56,7 +57,7 @@ func StartServer(config *room.ServerConfig) (*room.Server, error) {
 func RunDiscovery(ctx context.Context, server *room.Server) {
 	log.Printf("[INFO] Server running at %s", server.Addr())
 
-	disco, err := room.DiscoveryServer(server)
+	disco, err := roomdisco.NewDiscoverableServer(server)
 	if err != nil {
 		log.Printf("[FATAL] Discovery failed to start: %v", err)
 		return

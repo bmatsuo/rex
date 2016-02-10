@@ -12,6 +12,8 @@ import (
 )
 
 // ServerDisco is a running instance of Room accesable at Addr.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 type ServerDisco struct {
 	Room    *Room
 	TCPAddr *net.TCPAddr
@@ -21,6 +23,8 @@ type ServerDisco struct {
 // LookupRoom finds server applications with rooms that look like r.
 // LookupRoom ignores the instance name of advertised services and relies only
 // on the service identifier.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 //
 // BUG?  Not sure how mdns lookup handled channels when an error is
 // encountered.
@@ -61,6 +65,8 @@ func LookupRoom(r *Room, servers chan<- *ServerDisco) error {
 }
 
 // ZoneConfig configures mDNS for a Room.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 type ZoneConfig struct {
 	Room *Room
 	Port int
@@ -69,6 +75,8 @@ type ZoneConfig struct {
 }
 
 // NewZoneConfig returns a default mDNS zone configuration derived from s.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 func NewZoneConfig(s *Server) (*ZoneConfig, error) {
 	zc := &ZoneConfig{
 		Room: s.config.Room,
@@ -99,6 +107,8 @@ func NewZoneConfig(s *Server) (*ZoneConfig, error) {
 }
 
 // Instance returns the mdns instance identifier corresponding to zc.Room.Name.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 func (zc *ZoneConfig) Instance() string {
 	now := time.Now().Format("20060102150405")
 	return fmt.Sprintf("%s_%d_%s", now, os.Getpid(), zc.Room.Name)
@@ -129,12 +139,16 @@ func (zc *ZoneConfig) mdnsConfig(iface *net.Interface) (*mdns.Config, error) {
 }
 
 // Discovery is an opaque type that contains an mDNS discovery server.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 type Discovery interface {
 	Close() error
 	discoveryServer()
 }
 
 // DiscoveryServer returns a Discovery using the default ZoneConfig for s.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 func DiscoveryServer(s *Server) (Discovery, error) {
 	zc, err := NewZoneConfig(s)
 	if err != nil {
@@ -145,6 +159,8 @@ func DiscoveryServer(s *Server) (Discovery, error) {
 
 // NewDiscovery returns a new Discovery server that is advertizing the Room in
 // zc.
+//
+// NOTE: This is depricated. Use the roomdisco package isntead.
 func NewDiscovery(zc *ZoneConfig) (Discovery, error) {
 	config, err := zc.mdnsConfig(nil)
 	if err != nil {

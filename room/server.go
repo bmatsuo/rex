@@ -93,6 +93,11 @@ func (s *Server) initHTTP() {
 	}
 }
 
+// Room returns the Room s is hosting.
+func (s *Server) Room() *Room {
+	return s.config.Room
+}
+
 func (s *Server) bus() *Bus {
 	return s.config.Bus
 }

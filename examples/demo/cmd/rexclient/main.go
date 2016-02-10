@@ -78,7 +78,7 @@ func main() {
 
 		log.Printf("[INFO] Waiting for servers")
 		go func() {
-			err := room.LookupRoom(rexdemo.Room, servers)
+			err := room.LookupRoom(background, rexdemo.Room, servers)
 			if err != nil {
 				log.Printf("[ERR] Failed network lookup: %v", err)
 			}
