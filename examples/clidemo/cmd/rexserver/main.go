@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/bmatsuo/rex/examples/demo/rexdemo"
+	"github.com/bmatsuo/rex/examples/clidemo"
 	"github.com/bmatsuo/rex/room"
 	"github.com/bmatsuo/rex/room/roomdisco"
 )
@@ -17,7 +17,7 @@ func main() {
 
 	// initialize the room server and launch the discovery server.
 	config := &room.ServerConfig{
-		Room: rexdemo.Room,
+		Room: clidemo.Room,
 		Bus:  room.NewBus(background, demo),
 		Addr: room.BestAddr(),
 	}

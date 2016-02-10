@@ -13,6 +13,7 @@ import (
 	"github.com/bmatsuo/rex/examples/demo/rexdemo"
 	"github.com/bmatsuo/rex/examples/exutil/exfont"
 	"github.com/bmatsuo/rex/room"
+	"github.com/bmatsuo/rex/room/roomdisco"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/mobile/app"
@@ -63,12 +64,12 @@ func main() {
 	app.Main(func(a app.App) {
 		background := context.Background()
 
-		server := make(chan *room.ServerDisco)
-		servers := make(chan *room.ServerDisco)
+		server := make(chan *roomdisco.Server)
+		servers := make(chan *roomdisco.Server)
 		go func() {
 			// ignore all but the first server found for now
 			defer close(server)
-			var chosen *room.ServerDisco
+			var chosen *roomdisco.Server
 			chosen, ok := <-servers
 			if !ok {
 				return
@@ -78,7 +79,7 @@ func main() {
 
 		log.Printf("[INFO] Waiting for servers")
 		go func() {
-			err := room.LookupRoom(background, rexdemo.Room, servers)
+			err := roomdisco.Query(background, rexdemo.Room, servers)
 			if err != nil {
 				log.Printf("[ERR] Failed network lookup: %v", err)
 			}
@@ -96,7 +97,7 @@ func main() {
 		messages = make(chan room.Content, 1)
 		remotePt = make(chan RemotePoint, 1)
 
-		runClient := func(ctx context.Context, client *room.Client, server *room.ServerDisco) {
+		runClient := func(ctx context.Context, client *room.Client, server *roomdisco.Server) {
 			ip := server.Entry.AddrV4
 			if ip == nil {
 				ip = server.Entry.AddrV6

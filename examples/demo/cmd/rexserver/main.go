@@ -13,6 +13,7 @@ import (
 	"github.com/bmatsuo/rex/examples/demo/rexdemo"
 	"github.com/bmatsuo/rex/examples/exutil/exfont"
 	"github.com/bmatsuo/rex/room"
+	"github.com/bmatsuo/rex/room/roomdisco"
 	"github.com/codegangsta/cli"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -241,7 +242,7 @@ func StartServer(config *room.ServerConfig) (*room.Server, error) {
 func RunDiscovery(ctx context.Context, server *room.Server) {
 	log.Printf("[INFO] Server running at %s", server.Addr())
 
-	disco, err := room.DiscoveryServer(server)
+	disco, err := roomdisco.NewDiscoverableServer(server)
 	if err != nil {
 		log.Printf("[FATAL] Discovery failed to start: %v", err)
 		return
