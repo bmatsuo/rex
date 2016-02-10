@@ -134,9 +134,18 @@ type Discovery interface {
 	discoveryServer()
 }
 
-// DiscoveryServer returns a new Discovery server that is advertizing the Room
-// in zc.
-func DiscoveryServer(zc *ZoneConfig) (Discovery, error) {
+// DiscoveryServer returns a Discovery using the default ZoneConfig for s.
+func DiscoveryServer(s *Server) (Discovery, error) {
+	zc, err := NewZoneConfig(s)
+	if err != nil {
+		return nil, fmt.Errorf("zone config: %v", err)
+	}
+	return NewDiscovery(zc)
+}
+
+// NewDiscovery returns a new Discovery server that is advertizing the Room in
+// zc.
+func NewDiscovery(zc *ZoneConfig) (Discovery, error) {
 	config, err := zc.mdnsConfig(nil)
 	if err != nil {
 		return nil, fmt.Errorf("invalid discovery configuration: %v", err)
@@ -147,11 +156,15 @@ func DiscoveryServer(zc *ZoneConfig) (Discovery, error) {
 		return nil, err
 	}
 	log.Printf("[INFO] Discovery server started")
-	d := &mdnsDiscovery{srv: srv}
+	d := &mdnsDiscovery{
+		zc:  zc,
+		srv: srv,
+	}
 	return d, nil
 }
 
 type mdnsDiscovery struct {
+	zc  *ZoneConfig
 	srv *mdns.Server
 }
 

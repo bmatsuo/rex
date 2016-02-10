@@ -7,8 +7,30 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
+
+// BestAddr returns the best address at which a server should bind.  It
+// attempts to locate the interface address for the local network.  When no
+// address can be found the discovery server may just attempt to bind to the
+// default address ":0".
+func BestAddr() string {
+	var best string
+	addrs, err := net.InterfaceAddrs()
+	if err == nil {
+		for _, addr := range addrs {
+			str := addr.String()
+			if strings.HasPrefix(str, "10.") || strings.HasPrefix(str, "192.") {
+				// looks like a local address. we will try to bind to it.
+				best = addr.String()
+				best = strings.SplitN(best, "/", 2)[0]
+				best += ":0"
+			}
+		}
+	}
+	return best
+}
 
 // Room represents a single shared enivornment managed by a server.  The
 // service is advertised using mDNS an must conform to the format specified in

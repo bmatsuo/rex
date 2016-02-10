@@ -7,9 +7,7 @@ import (
 	"image"
 	_color "image/color"
 	"log"
-	"net"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/bmatsuo/rex/examples/demo/rexdemo"
@@ -70,7 +68,29 @@ func ServerMain(a app.App) {
 	remotePt = make(chan rexdemo.RemotePoint, 1)
 	demo = NewDemo()
 
-	go RunDiscovery(background, demo)
+	// initialize the room server and launch the discovery server.
+	bestAddr := room.BestAddr()
+	if bestAddr != "" {
+		log.Printf("[WARN] Unable to locate a good address for binding")
+	}
+	config := &room.ServerConfig{
+		Room: rexdemo.Room,
+		Bus:  room.NewBus(background, demo),
+		Addr: bestAddr,
+	}
+	server, err := StartServer(config)
+	if err != nil {
+		log.Printf("[FATAL] Unable to initialize server: %v", err)
+		os.Exit(1)
+	}
+	go func() {
+		err = server.Wait()
+		if err != nil {
+			log.Printf("[FATAL] Server terminated: %v", err)
+			return
+		}
+	}()
+	go RunDiscovery(background, server)
 
 	var glctx gl.Context
 	var sz size.Event
@@ -205,65 +225,31 @@ void main() {
 	gl_FragColor = color;
 }`
 
-// RunDiscovery runs the discover server
-func RunDiscovery(background context.Context, demo *DemoServer) {
-	var bestAddr string
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		log.Printf("[ERR] Failed to retreived interfaces")
-	} else {
-		log.Printf("[INFO] %d network interface addresses", len(addrs))
-		for _, addr := range addrs {
-			str := addr.String()
-			if strings.HasPrefix(str, "10.") || strings.HasPrefix(str, "192.") {
-				// looks like a local address. we will try to bind to it.
-				bestAddr = addr.String()
-				bestAddr = strings.SplitN(bestAddr, "/", 2)[0]
-				bestAddr += ":0"
-			}
-			log.Printf("[DEBUG] IFACE %s", addr)
-		}
-	}
-	if bestAddr == "" {
-		log.Printf("[WARN] Unable to locate a good address for binding")
-	}
-
-	log.Printf("[INFO] demo server initializing")
-	bus := room.NewBus(background, demo)
-	config := &room.ServerConfig{
-		Room: rexdemo.Room,
-		Bus:  bus,
-		Addr: bestAddr,
-	}
+// StartServer starts serving clients using the bus and address from config.
+func StartServer(config *room.ServerConfig) (*room.Server, error) {
 	server := room.NewServer(config)
-
-	log.Printf("[INFO] starting server")
-	err = server.Start()
+	log.Printf("[INFO] Server binding to address %s", server.Addr)
+	err := server.Start()
 	if err != nil {
-		log.Printf("[FATAL] %v", err)
-		return
+		return nil, err
 	}
 
-	log.Printf("[INFO] server running at %s", server.Addr())
+	return server, nil
+}
 
-	log.Printf("[INFO] creating mDNS discovery server")
-	zc, err := room.NewZoneConfig(server)
+// RunDiscovery runs the discover server
+func RunDiscovery(ctx context.Context, server *room.Server) {
+	log.Printf("[INFO] Server running at %s", server.Addr())
+
+	disco, err := room.DiscoveryServer(server)
 	if err != nil {
-		log.Printf("[FATAL] Failed to initialize discovery")
-		return
-	}
-	disco, err := room.DiscoveryServer(zc)
-	if err != nil {
-		log.Printf("[FATAL] Discovery server failed to start: %v", err)
+		log.Printf("[FATAL] Discovery failed to start: %v", err)
 		return
 	}
 	defer disco.Close()
 
-	err = server.Wait()
-	if err != nil {
-		log.Printf("[FATAL] %v", err)
-		return
-	}
+	log.Printf("[INFO] Discovery server is running")
+	<-ctx.Done()
 }
 
 // DemoServer is the server side (source of truth) of the demo object.
