@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bmatsuo/rex/room"
 	"github.com/golang/freetype/truetype"
-	"github.com/gophergala2016/rex/room"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/mobile/event/size"

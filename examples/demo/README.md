@@ -35,9 +35,9 @@ location of the triangle on each screen is synchronized when touch events
 occur.  The stats at the top of each screen are there to ensure the states of
 each device is up to date.
 
-![Demo on desktop](https://raw.githubusercontent.com/gophergala2016/rex/master/screenshots/demo.png)
+![Demo on desktop](https://raw.githubusercontent.com/bmatsuo/rex/master/screenshots/demo.png)
 
 This image shows the server running on an Android TV (specifically, a Google
 Nexus Player set-top box) and a computer running two connected clients.
 
-![Demo on TV](https://raw.githubusercontent.com/gophergala2016/rex/master/screenshots/demo-tv.jpg)
+![Demo on TV](https://raw.githubusercontent.com/bmatsuo/rex/master/screenshots/demo-tv.jpg)

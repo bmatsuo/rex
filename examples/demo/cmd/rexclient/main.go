@@ -10,10 +10,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/bmatsuo/rex/examples/demo/rexdemo"
+	"github.com/bmatsuo/rex/examples/exutil/exfont"
+	"github.com/bmatsuo/rex/room"
 	"github.com/golang/freetype/truetype"
-	"github.com/gophergala2016/rex/examples/demo/rexdemo"
-	"github.com/gophergala2016/rex/examples/exutil/exfont"
-	"github.com/gophergala2016/rex/room"
 	"golang.org/x/image/font"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/event/lifecycle"
