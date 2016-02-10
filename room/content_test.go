@@ -3,7 +3,7 @@ package room
 import "testing"
 
 func TestEvent(t *testing.T) {
-	dt := &dumbTime{}
+	dt := new(dumbTime)
 	c1 := String("test content")
 	e1 := newEvent(1234, c1, dt.Now)
 	if e1.Index() != 1234 {
@@ -12,13 +12,13 @@ func TestEvent(t *testing.T) {
 	if e1.Text() != c1.Text() {
 		t.Errorf("content: %v", e1.Text())
 	}
-	if e1.Time().(t64) != 1 {
+	if e1.Time().N != 1 {
 		t.Errorf("time: %v", e1.Time())
 	}
 }
 
 func TestMsg(t *testing.T) {
-	dt := &dumbTime{}
+	dt := new(dumbTime)
 	sess := "test session"
 	c1 := String("test content")
 	m1 := newMsg(sess, c1, dt.Now)
@@ -28,7 +28,7 @@ func TestMsg(t *testing.T) {
 	if m1.Text() != c1.Text() {
 		t.Errorf("content: %v", m1.Text())
 	}
-	if m1.Time().(t64) != 1 {
+	if m1.Time().N != 1 {
 		t.Errorf("time: %v", m1.Time())
 	}
 }

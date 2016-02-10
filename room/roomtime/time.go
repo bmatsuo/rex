@@ -9,7 +9,7 @@ import (
 
 // Time is an abstract time value
 type Time struct {
-	n uint64
+	N uint64
 }
 
 // New allocates and returns a new Time.
@@ -24,14 +24,14 @@ func Parse(raw []byte) *Time {
 	}
 
 	n := binary.BigEndian.Uint64(raw)
-	t := &Time{n: n}
+	t := &Time{N: n}
 	return t
 }
 
 // Bytes returns the wire format representation of t.
 func (t *Time) Bytes() []byte {
 	var b [8]byte
-	binary.BigEndian.PutUint64(b[:], t.n)
+	binary.BigEndian.PutUint64(b[:], t.N)
 	return b[:]
 }
 
