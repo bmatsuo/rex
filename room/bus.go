@@ -8,15 +8,15 @@ import (
 	"golang.org/x/net/context"
 )
 
-// Handler is a bus message handler.
-type Handler interface {
+// MsgHandler is a bus message handler.
+type MsgHandler interface {
 	HandleMessage(ctx context.Context, msg Msg)
 }
 
-// handlerFunc implement Handler
+// handlerFunc implement MsgHandler
 type handlerFunc func(context.Context, Msg)
 
-func hfunc(fn func(ctx context.Context, msg Msg)) Handler {
+func hfunc(fn func(ctx context.Context, msg Msg)) MsgHandler {
 	return handlerFunc(fn)
 }
 
@@ -30,7 +30,7 @@ type Bus struct {
 	term chan struct{}
 
 	hmut     sync.RWMutex
-	handlers []Handler
+	handlers []MsgHandler
 
 	sub       chan chan<- int
 	eventsin  chan Event
@@ -40,7 +40,7 @@ type Bus struct {
 }
 
 // NewBus initializes and returns a new Bus.
-func NewBus(ctx context.Context, handlers ...Handler) *Bus {
+func NewBus(ctx context.Context, handlers ...MsgHandler) *Bus {
 	b := &Bus{}
 	b.init()
 	b.handlers = handlers
@@ -77,7 +77,7 @@ func (b *Bus) Message(session string, c Content) error {
 }
 
 // AddHandler changes the bus message handler.
-func (b *Bus) AddHandler(h Handler) {
+func (b *Bus) AddHandler(h MsgHandler) {
 	b.hmut.Lock()
 	defer b.hmut.Unlock()
 	b.handlers = append(b.handlers, h)
