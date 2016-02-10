@@ -1,32 +1,16 @@
 package room
 
 import (
-	"encoding/binary"
-	"encoding/hex"
 	"sync/atomic"
+
+	"github.com/bmatsuo/rex/room/roomtime"
 )
 
-var dt = &dumbTime{}
+var dt = new(dumbTime)
 
-// Time has not been figured out yet.  It is definitely an abstract time.  I
-// would like it if all events and messages had unique identifiers.
-type Time interface{}
+type dumbTime uint64
 
-type dumbTime struct {
-	t uint64
-}
-
-func (t *dumbTime) Now() Time {
-	now := atomic.AddUint64(&t.t, 1)
-	return t64(now)
-}
-
-type t64 uint64
-
-func (t t64) String() string {
-	var buf1 [8]byte
-	var buf2 [16]byte
-	binary.BigEndian.PutUint64(buf1[:], uint64(t))
-	hex.Encode(buf2[:], buf1[:])
-	return string(buf2[:])
+func (t *dumbTime) Now() *roomtime.Time {
+	now := atomic.AddUint64((*uint64)(t), 1)
+	return roomtime.New(now)
 }

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bmatsuo/rex/room/roomtime"
 	"github.com/bmatsuo/uuid"
 	"golang.org/x/net/context"
 )
@@ -21,7 +22,7 @@ type Client struct {
 	Port    int
 	Handler EventHandler
 	HTTP    *http.Client
-	Now     func() Time
+	Now     func() *roomtime.Time
 	Session string
 }
 

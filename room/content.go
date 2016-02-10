@@ -1,6 +1,23 @@
 package room
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/bmatsuo/rex/room/roomtime"
+)
+
+// Codec performs serialization for room data.
+type Codec interface {
+	// EncodeMessage serializes v and returns the []byte or any error.
+	EncodeMessage(v Msg) []byte
+	// DecodeMessage deserializes b into a Msg and returns it with any error.
+	DecodeMessage(b []byte) (Msg, error)
+
+	// DecodeEvent deserializes b into an Event and returns it with any error.
+	DecodeEvent(b []byte) (Event, error)
+	// EncodeEvent serializes v and returns the []byte or any error.
+	EncodeEvent(v Event) []byte
+}
 
 // Content is application data that is transmitted over a bus.
 type Content interface {
@@ -55,7 +72,7 @@ func (c contentString) Text() string {
 type Event interface {
 	Index() uint64
 
-	Time() Time
+	Time() *roomtime.Time
 
 	Content
 }
@@ -66,20 +83,20 @@ type Msg interface {
 	// the message.
 	Session() string
 
-	Time() Time
+	Time() *roomtime.Time
 
 	Content
 }
 
-func newEvent(i uint64, c Content, t func() Time) Event {
+func newEvent(i uint64, c Content, t func() *roomtime.Time) Event {
 	event := &simpleEvent{i, t(), c}
 	return event
 }
 
 type jsonEvent struct {
-	I     uint64 `json:"index"`
-	T     Time   `json:"time"`
-	D     string `json:"data"`
+	I     uint64         `json:"index"`
+	T     *roomtime.Time `json:"time"`
+	D     string         `json:"data"`
 	Event `json:"-"`
 }
 
@@ -108,14 +125,14 @@ func (event *jsonEvent) UnmarshalJSON(b []byte) error {
 	event.Event = newEvent(
 		event.I,
 		String(event.D),
-		func() Time { return event.T },
+		func() *roomtime.Time { return event.T },
 	)
 	return nil
 }
 
 type simpleEvent struct {
 	i uint64
-	t Time
+	t *roomtime.Time
 	Content
 }
 
@@ -125,14 +142,14 @@ func (event *simpleEvent) Index() uint64 {
 	return event.i
 }
 
-func (event *simpleEvent) Time() Time {
+func (event *simpleEvent) Time() *roomtime.Time {
 	return event.t
 }
 
 type jsonMsg struct {
-	S   string `json:"session"`
-	T   Time   `json:"time"`
-	D   string `json:"data"`
+	S   string         `json:"session"`
+	T   *roomtime.Time `json:"time"`
+	D   string         `json:"data"`
 	Msg `json:"-"`
 }
 
@@ -158,18 +175,18 @@ func (msg *jsonMsg) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	msg.Msg = newMsg(msg.S, String(msg.D), func() Time { return msg.T })
+	msg.Msg = newMsg(msg.S, String(msg.D), func() *roomtime.Time { return msg.T })
 	return nil
 }
 
-func newMsg(session string, c Content, t func() Time) Msg {
+func newMsg(session string, c Content, t func() *roomtime.Time) Msg {
 	msg := &simpleMsg{session, t(), c}
 	return msg
 }
 
 type simpleMsg struct {
 	sess string
-	t    Time
+	t    *roomtime.Time
 	Content
 }
 
@@ -179,6 +196,6 @@ func (msg *simpleMsg) Session() string {
 	return msg.sess
 }
 
-func (msg *simpleMsg) Time() Time {
+func (msg *simpleMsg) Time() *roomtime.Time {
 	return msg.t
 }
